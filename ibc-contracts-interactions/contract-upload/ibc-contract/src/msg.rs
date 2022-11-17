@@ -1,41 +1,30 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use crate::state::Operation;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum InstantiateMsg {
     Init {},
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
-    SendIbcPacket {
-        message: String,
-    },
-    RequestRandomnessFromOtherChain {},
+    SendIbcPacket { message: String },
+    RequestLifeAnswerFromOtherChain { job_id: String },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum QueryMsg {
     LastIbcOperation {},
-    ViewReceivedRandomness {},
+    ViewReceivedLifeAnswer {},
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-pub enum QueryAnswer {
-    LastIBCOperation(Operation),
-    ViewReceivedRandomness(u32),
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum PacketMsg {
-    Test {},
     Message { value: String },
-    RequestRandomness { job_id: String },
-    ReceiveRandomness { random_value: u32 },
+    RequestLifeAnswer { job_id: String },
+    ReceiveLifeAnswer { life_answer: u32 },
 }

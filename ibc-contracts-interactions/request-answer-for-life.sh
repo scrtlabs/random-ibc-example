@@ -1,5 +1,5 @@
 secretcli tx compute execute $(head -n 1 ./contract-upload/contract-addresses.log) \
-    '{"request_randomness_from_other_chain": {"job_id": "job-id-that-I-set"}}' --from a -y
+    '{"request_life_answer_from_other_chain": {"job_id": "some-job-id"}}' --from a -y
 
 sleep 4
 

@@ -20,7 +20,9 @@ docker compose up
 ```
 
 ### Upload the contracts (Run from ibc-contracts-interactions/contract-upload)
-In another terminal, The test script will store the contracts, instantiate them, save their address to helper files, and run a test to check correctness
+In another terminal, The test script will store the contracts, instantiate them, save their address to helper files, and run a test to check correctness.
+Notice that if you want any other test besides 'just setup contracts' to pass, you'll need to wait for hermes
+to start. It might take a couple of minutes since 'docker compose up'
 ```bash
 cd ibc-contracts-interactions/contract-upload
 yarn test
@@ -34,12 +36,12 @@ How did the contract's queries change? (Check the terminal of ./query-contracts.
 
 ### Send a packet and relay it to the other chain (Run from ibc-contracts-interactions)
 ```bash
-./send-randomness-request.sh
+./request-answer-for-life.sh
 ```
 How did the contract's queries change?
 
 ### Finally query the contract on localsecret-1 to see the reply from localsecret-2 (Run from ibc-contracts-interactions)
 ```bash
-secretcli q compute query $(head -n 1 ./contract-upload/contract-addresses.log) '{"view_received_randomness": {}}'
+secretcli q compute query $(head -n 1 ./contract-upload/contract-addresses.log) '{"view_received_life_answer": {}}'
 ```
 You should get the answer for life ;) (42)

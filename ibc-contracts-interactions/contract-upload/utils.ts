@@ -3,7 +3,6 @@ import {
   SecretNetworkClient,
   toHex,
   toUtf8,
-  Wallet,
   MsgStoreCode,
   MsgInstantiateContract,
   Tx,
@@ -33,7 +32,6 @@ const bytesToKv = (input: BytesObj) => {
 };
 
 const objToKv = (input) => {
-  // console.log("got object:", input);
   const output = {};
   const key = bytesToKv(input.key);
   output[key] = bytesToKv(input.value);
@@ -41,8 +39,6 @@ const objToKv = (input) => {
 };
 
 export const cleanBytes = (tx) => {
-  // console.log("input:", JSON.stringify(testInput, null, 2), "\n\n");
-
   const events = tx.events.map((e) => {
     return {
       ...e,
@@ -60,7 +56,6 @@ export const cleanBytes = (tx) => {
   output.tx.authInfo = "redacted";
   output.tx.body.messages.forEach((m) => (m.value.wasmByteCode = "redacted"));
 
-  // console.log("output:", JSON.stringify(output, null, 2));
   return output;
 };
 
@@ -102,7 +97,7 @@ export async function waitForBlocks(chainId: string) {
         break;
       }
     } catch (e) {
-      // console.error("block error:", e);
+      console.error("block error:", e);
     }
     await sleep(100);
   }
@@ -132,7 +127,7 @@ export async function waitForIBCConnection(
         break;
       }
     } catch (e) {
-      // console.error("IBC error:", e, "on chain", chainId);
+      console.error("IBC error:", e, "on chain", chainId);
     }
     await sleep(100);
   }
@@ -160,7 +155,7 @@ export async function waitForIBCChannel(
         }
       }
     } catch (e) {
-      // console.error("IBC error:", e, "on chain", chainId);
+      console.error("IBC error:", e, "on chain", chainId);
     }
     await sleep(100);
   }
