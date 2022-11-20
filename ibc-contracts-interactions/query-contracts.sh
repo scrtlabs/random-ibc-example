@@ -15,12 +15,12 @@ query_contracts_forever() {
         local result_2
 
         # query chain 1 and save output to file
-        result_1=$(secretcli q compute query $(head -n 1 ./contract-upload/contract-addresses.log) '{"last_ibc_operation":{}}' --node 'tcp://localhost:26657' 2>&1 | fold -w $width)
+        result_1=$(secretcli q compute query $(head -n 1 ./contract-addresses.log) '{"last_ibc_operation":{}}' --node 'tcp://localhost:26657' 2>&1 | fold -w $width)
         #echo "got result: $result_1"
         echo -e "chain 1\n$result_1" > output-query-1.log
 
         # query chain 2 and save output to a second file
-        result_2=$(secretcli q compute query $(tail -n 1 ./contract-upload/contract-addresses.log) '{"last_ibc_operation":{}}' --node 'tcp://localhost:36657' 2>&1 | fold -w $width)
+        result_2=$(secretcli q compute query $(tail -n 1 ./contract-addresses.log) '{"last_ibc_operation":{}}' --node 'tcp://localhost:36657' 2>&1 | fold -w $width)
         # echo "got result: $result_2"
         echo -e "chain 2\n$result_2" > output-query-2.log
 

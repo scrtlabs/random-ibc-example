@@ -1,0 +1,26 @@
+{
+  "name": "deploy-basic-ibc",
+  "version": "1.4.0",
+  "license": "MIT",
+  "scripts": {
+    "test": "make -C ../ibc-contract && jest --forceExit"
+  },
+  "devDependencies": {
+    "@confio/relayer": "0.0.0-main-3b30964",
+    "@cosmjs/stargate": "0.29.0",
+    "@noble/hashes": "1.1.2",
+    "@types/jest": "28.1.7",
+    "@types/node": "18.7.9",
+    "jest": "28.1.3",
+    "prettier": "2.7.1",
+    "secretjs": "1.4.3",
+    "ts-jest": "28.0.8",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.1.0",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "@types/react-leaflet": "^2.8.2",
+    "sinon": "^14.0.2"
+  }
+}

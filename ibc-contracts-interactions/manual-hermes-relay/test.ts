@@ -103,15 +103,15 @@ beforeAll(async () => {
     waitForBlocks(chainNames[1]),
   ]);
 
-  wasmCode = fs.readFileSync(`${__dirname}/ibc-contract/ibc.wasm`) as Uint8Array;
+  wasmCode = fs.readFileSync(`${__dirname}/../ibc-contract/ibc.wasm`) as Uint8Array;
   contracts[chainNames[0]].codeHash = toHex(sha256(wasmCode));
   contracts[chainNames[1]].codeHash = toHex(sha256(wasmCode));
 
   contracts[chainNames[0]] = await uploadAndInstantiateContract(chainNames[0], accounts[0].secretjs);
   contracts[chainNames[1]] = await uploadAndInstantiateContract(chainNames[1], accounts2[0].secretjs);
 
-  fs.writeFileSync("./contract-addresses.log", contracts[chainNames[0]].address + "\n");
-  fs.appendFileSync("./contract-addresses.log", contracts[chainNames[1]].address);
+  fs.writeFileSync("../contract-addresses.log", contracts[chainNames[0]].address + "\n");
+  fs.appendFileSync("../contract-addresses.log", contracts[chainNames[1]].address);
 });
 
 describe("IBC", () => {

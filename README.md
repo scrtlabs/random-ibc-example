@@ -1,7 +1,7 @@
 ## Secret IBC setup
 Two local secrets can Inter-blockchainly communicate with each other via a Hermes relayer
 
-### Build (Run from relayer-container)
+### Build (Run from hermes-container)
 ```bash
 docker build -f hermes.Dockerfile . --tag hermes:test
 ```
@@ -21,7 +21,7 @@ secretcli config node http://localhost:26657
 # check the initial balance of a
 secretcli q bank balances $(secretcli keys list | jq -r '.[] | select(.name=="a") | .address') | jq
 
-# transfer to the destination network
+# transfer to the destination network (Wait long enough for the channel to be created in the hermes-relayer container)
 secretcli tx ibc-transfer transfer transfer channel-0 secret1fc3fzy78ttp0lwuujw7e52rhspxn8uj52zfyne 2uscrt --from a
 
 # check a's balance after transfer
