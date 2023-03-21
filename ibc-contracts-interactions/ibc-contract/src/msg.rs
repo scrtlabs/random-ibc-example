@@ -26,5 +26,5 @@ pub enum QueryMsg {
 pub enum PacketMsg {
     Message { value: String },
     RequestLifeAnswer { job_id: String },
-    ReceiveLifeAnswer { life_answer: u32 },
+    ReceiveLifeAnswer { life_answer: String },
 }

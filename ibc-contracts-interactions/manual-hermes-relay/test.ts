@@ -103,7 +103,7 @@ beforeAll(async () => {
     waitForBlocks(chainNames[1]),
   ]);
 
-  wasmCode = fs.readFileSync(`${__dirname}/../ibc-contract/ibc.wasm`) as Uint8Array;
+  wasmCode = fs.readFileSync(`${__dirname}/../../ibc-contract/ibc.wasm`) as Uint8Array;
   contracts[chainNames[0]].codeHash = toHex(sha256(wasmCode));
   contracts[chainNames[1]].codeHash = toHex(sha256(wasmCode));
 

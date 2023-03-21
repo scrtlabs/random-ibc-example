@@ -3,7 +3,7 @@ import * as fs from "fs";
 import {
   SecretNetworkClient,
   toHex,
-  Tx,
+  TxResponse,
   Wallet,
 } from "secretjs";
 import { AminoWallet } from "secretjs/dist/wallet_amino";
@@ -39,7 +39,7 @@ const contracts = {
   [chainNames[1]]: new Contract,
 };
 
-const populateAccounts = async (accountList, mnemonics, chainId, endpoint) => {
+const populateAccounts = async (accountList: { address: string; mnemonic: any; walletAmino: AminoWallet; walletProto: Wallet; secretjs: SecretNetworkClient; }[], mnemonics: string | any[], chainId: string, endpoint: string) => {
   for (let i = 0; i < mnemonics.length; i++) {
     const mnemonic = mnemonics[i];
     const walletAmino = new AminoWallet(mnemonic);
@@ -48,8 +48,8 @@ const populateAccounts = async (accountList, mnemonics, chainId, endpoint) => {
       mnemonic: mnemonic,
       walletAmino,
       walletProto: new Wallet(mnemonic),
-      secretjs: await SecretNetworkClient.create({
-        grpcWebUrl: endpoint,
+      secretjs: new SecretNetworkClient({
+        url: endpoint,
         wallet: walletAmino,
         walletAddress: walletAmino.address,
         chainId,
@@ -62,13 +62,15 @@ async function uploadAndInstantiateContract(chainName: string, client: SecretNet
   let contract = new Contract
   console.log("Storing contracts on " + chainName + "...");
 
-  let tx: Tx = await storeContracts(client, [wasmCode]);
+  let tx: TxResponse = await storeContracts(client, [wasmCode]);
 
+  // @ts-ignore
   contract.codeId = Number(tx.arrayLog.find((x) => x.key === "code_id").value);
 
   console.log("Instantiating contracts on " + chainName + "...");
   tx = await instantiateContracts(client, [contract], { init: {} });
 
+  // @ts-ignore
   contract.address = tx.arrayLog.find((x) => x.key === "contract_address").value;
   contract.ibcPortId = "wasm." + contract.address;
   console.log("contract on " + chainName + " got address:", contract.address);
@@ -85,21 +87,21 @@ const runRelayer = async () => {
     "word twist toast cloth movie predict advance crumble escape whale sail such angry muffin balcony keen move employ cook valve hurt glimpse breeze brick",
   ];
 
+  // Create readonly clients
+  readonly = new SecretNetworkClient({ chainId: chainNames[0], url: "http://localhost:1317" });
+  readonly2 = new SecretNetworkClient({ chainId: chainNames[1], url: "http://localhost:3317" });
+
   await Promise.all([
     // Create clients for existing wallets in the chains
-    populateAccounts(accounts, mnemonics, chainNames[0], "http://localhost:9091"),
-    populateAccounts(accounts2, mnemonics, chainNames[1], "http://localhost:9391"),
-
-    // Create readonly clients
-    SecretNetworkClient.create({ chainId: chainNames[0], grpcWebUrl: "http://localhost:9091" }).then(result => readonly = result),
-    SecretNetworkClient.create({ chainId: chainNames[1], grpcWebUrl: "http://localhost:9391" }).then(result => readonly2 = result),
+    populateAccounts(accounts, mnemonics, chainNames[0], "http://localhost:1317"),
+    populateAccounts(accounts2, mnemonics, chainNames[1], "http://localhost:3317"),
 
     // Wait for the chains to be running
-    waitForBlocks(chainNames[0]),
-    waitForBlocks(chainNames[1]),
+    waitForBlocks(chainNames[0], "http://localhost:1317"),
+    waitForBlocks(chainNames[1], "http://localhost:3317"),
   ]);
 
-  wasmCode = fs.readFileSync(`${__dirname}/../ibc-contract/ibc.wasm`) as Uint8Array;
+  wasmCode = fs.readFileSync(`${__dirname}/../../ibc-contract/ibc.wasm`) as Uint8Array;
   contracts[chainNames[0]].codeHash = toHex(sha256(wasmCode));
   contracts[chainNames[1]].codeHash = toHex(sha256(wasmCode));
 

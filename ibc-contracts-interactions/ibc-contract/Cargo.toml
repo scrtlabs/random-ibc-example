@@ -33,11 +33,18 @@ stargate = []
 ibc3 = ["stargate"]
 
 [dependencies]
-cosmwasm-std = { package = "secret-cosmwasm-std", version = "1.0.0", features = [
+cosmwasm-std = { git = "https://github.com/scrtlabs/cosmwasm", branch = "random", package = "secret-cosmwasm-std", features = [
   "stargate",
   "ibc3",
+  "random"
 ] }
+cosmwasm-storage = { git = "https://github.com/scrtlabs/cosmwasm", branch = "random", package = "secret-cosmwasm-storage" }
+
 schemars = "0.8.1"
 serde = { version = "1.0.114", default-features = false, features = ["derive"] }
-secret-toolkit = "0.6.0"
-serde-json-wasm = "0.2.1"
+secret-toolkit = "0.7.0"
+serde-json-wasm = "0.5.0"
+
+[patch.crates-io]
+cosmwasm-std = { git = "https://github.com/scrtlabs/cosmwasm", branch = "random", package = "secret-cosmwasm-std" }
+cosmwasm-storage = { git = "https://github.com/scrtlabs/cosmwasm", branch = "random", package = "secret-cosmwasm-storage" }
