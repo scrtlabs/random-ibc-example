@@ -43,17 +43,17 @@ impl Channel {
     }
 }
 
-pub static STORED_LIFE_ANSWER: Item<u32> = Item::new(KEY_STORED_LIFE_ANSWER);
+pub static STORED_LIFE_ANSWER: Item<String> = Item::new(KEY_STORED_LIFE_ANSWER);
 
 pub struct StoredLifeAnswer {}
 impl StoredLifeAnswer {
-    pub fn get(store: &dyn Storage) -> StdResult<u32> {
+    pub fn get(store: &dyn Storage) -> StdResult<String> {
         STORED_LIFE_ANSWER.load(store).map_err(|_err| {
             StdError::generic_err("no life answer was received on this contract yet")
         })
     }
 
-    pub fn save(store: &mut dyn Storage, life_answer: u32) -> StdResult<()> {
+    pub fn save(store: &mut dyn Storage, life_answer: String) -> StdResult<()> {
         STORED_LIFE_ANSWER.save(store, &life_answer)
     }
 }

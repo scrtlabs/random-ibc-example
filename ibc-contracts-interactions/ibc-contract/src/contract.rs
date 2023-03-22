@@ -211,7 +211,7 @@ pub fn ibc_channel_connect(
 #[entry_point]
 pub fn ibc_packet_receive(
     deps: DepsMut,
-    _env: Env,
+    env: Env,
     msg: IbcPacketReceiveMsg,
 ) -> StdResult<IbcReceiveResponse> {
     Operation::save_last(
@@ -240,7 +240,12 @@ pub fn ibc_packet_receive(
         }
 
         PacketMsg::RequestLifeAnswer { .. } => {
-            let res = PacketMsg::ReceiveLifeAnswer { life_answer: 42 };
+
+            deps.api.debug(&format!("{:?}", env));
+
+            let random = env.block.random.unwrap_or(Binary::from_base64("V1RGVEhJU05PV09SSw").unwrap());
+
+            let res = PacketMsg::ReceiveLifeAnswer { life_answer: random.to_string() };
             response = response.set_ack(to_binary(&res).unwrap());
         }
 
