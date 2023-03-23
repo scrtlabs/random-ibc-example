@@ -3,7 +3,8 @@
   "version": "1.4.0",
   "license": "MIT",
   "scripts": {
-    "test": "make -C ../ibc-contract"
+    "test": "make -C ../ibc-contract",
+    "build": "tsc"
   },
   "devDependencies": {
     "@confio/relayer": "0.0.0-main-3b30964",

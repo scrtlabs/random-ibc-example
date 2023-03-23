@@ -32,4 +32,6 @@ services:
   relayer:
     container_name: hermes-relayer
     image: "hermes:test"
-
+  contract-uploader:
+    container_name: uploader
+    image: "ghcr.io/scrtlabs/random-proxy-contract-uploader:v1.0.0"
