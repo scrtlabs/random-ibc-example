@@ -32,12 +32,19 @@ const accounts2: Account[] = new Array(2);
 let readonly: SecretNetworkClient;
 let readonly2: SecretNetworkClient;
 
+const chain1Address = "http://localsecret-1:1317"
+const chain2Address = "http://localsecret-2:1317"
+//../ibc-contract/
+const pathToContract = `${__dirname}/../ibc.wasm`
+
 let wasmCode: Uint8Array;
-const chainNames = ["secretdev-1", "secretdev-2"]
+const chainNames = [{name: "secretdev-1", address: chain1Address }, {name: "secretdev-2", address: chain2Address}];
 const contracts = {
-  [chainNames[0]]: new Contract,
-  [chainNames[1]]: new Contract,
+  [chainNames[0].name]: new Contract,
+  [chainNames[1].name]: new Contract,
 };
+
+
 
 const populateAccounts = async (accountList: { address: string; mnemonic: any; walletAmino: AminoWallet; walletProto: Wallet; secretjs: SecretNetworkClient; }[], mnemonics: string | any[], chainId: string, endpoint: string) => {
   for (let i = 0; i < mnemonics.length; i++) {
@@ -62,20 +69,27 @@ async function uploadAndInstantiateContract(chainName: string, client: SecretNet
   let contract = new Contract
   console.log("Storing contracts on " + chainName + "...");
 
-  let tx: TxResponse = await storeContracts(client, [wasmCode]);
+  try {
+    let tx: TxResponse = await storeContracts(client, [wasmCode]);
 
-  // @ts-ignore
-  contract.codeId = Number(tx.arrayLog.find((x) => x.key === "code_id").value);
+    // @ts-ignore
+    contract.codeId = Number(tx.arrayLog.find((x) => x.key === "code_id").value);
 
-  console.log("Instantiating contracts on " + chainName + "...");
-  tx = await instantiateContracts(client, [contract], { init: {} });
+    console.log("Instantiating contracts on " + chainName + "...");
+    tx = await instantiateContracts(client, [contract], { init: {} });
 
-  // @ts-ignore
-  contract.address = tx.arrayLog.find((x) => x.key === "contract_address").value;
-  contract.ibcPortId = "wasm." + contract.address;
-  console.log("contract on " + chainName + " got address:", contract.address);
+    // @ts-ignore
+    contract.address = tx.arrayLog.find((x) => x.key === "contract_address").value;
+    contract.ibcPortId = "wasm." + contract.address;
+    console.log("contract on " + chainName + " got address:", contract.address);
 
-  return contract
+    return contract
+  } catch (e) {
+    console.error(`Failed to store contract: ${JSON.stringify(e)}`);
+    throw e
+  }
+
+
 }
 let channelId1 = "";
 let channelId2 = "";
@@ -88,34 +102,34 @@ const runRelayer = async () => {
   ];
 
   // Create readonly clients
-  readonly = new SecretNetworkClient({ chainId: chainNames[0], url: "http://localhost:1317" });
-  readonly2 = new SecretNetworkClient({ chainId: chainNames[1], url: "http://localhost:3317" });
+  readonly = new SecretNetworkClient({ chainId: chainNames[0].name, url: "" });
+  readonly2 = new SecretNetworkClient({ chainId: chainNames[1].name, url: "" });
 
   await Promise.all([
     // Create clients for existing wallets in the chains
-    populateAccounts(accounts, mnemonics, chainNames[0], "http://localhost:1317"),
-    populateAccounts(accounts2, mnemonics, chainNames[1], "http://localhost:3317"),
+    populateAccounts(accounts, mnemonics, chainNames[0].name, chainNames[0].address),
+    populateAccounts(accounts2, mnemonics, chainNames[1].name, chainNames[1].address),
 
     // Wait for the chains to be running
-    waitForBlocks(chainNames[0], "http://localhost:1317"),
-    waitForBlocks(chainNames[1], "http://localhost:3317"),
+    waitForBlocks(chainNames[0].name, chainNames[0].address),
+    waitForBlocks(chainNames[1].name, chainNames[1].address),
   ]);
 
-  wasmCode = fs.readFileSync(`${__dirname}/../../ibc-contract/ibc.wasm`) as Uint8Array;
-  contracts[chainNames[0]].codeHash = toHex(sha256(wasmCode));
-  contracts[chainNames[1]].codeHash = toHex(sha256(wasmCode));
+  wasmCode = fs.readFileSync(pathToContract) as Uint8Array;
+  contracts[chainNames[0].name].codeHash = toHex(sha256(wasmCode));
+  contracts[chainNames[1].name].codeHash = toHex(sha256(wasmCode));
 
-  contracts[chainNames[0]] = await uploadAndInstantiateContract(chainNames[0], accounts[0].secretjs);
-  contracts[chainNames[1]] = await uploadAndInstantiateContract(chainNames[1], accounts2[0].secretjs);
+  contracts[chainNames[0].name] = await uploadAndInstantiateContract(chainNames[0].name, accounts[0].secretjs);
+  contracts[chainNames[1].name] = await uploadAndInstantiateContract(chainNames[1].name, accounts2[0].secretjs);
 
-  fs.writeFileSync("../contract-addresses.log", contracts[chainNames[0]].address + "\n");
-  fs.appendFileSync("../contract-addresses.log", contracts[chainNames[1]].address);
+  // fs.writeFileSync("../contract-addresses.log", contracts[chainNames[0].name].address + "\n");
+  // fs.appendFileSync("../contract-addresses.log", contracts[chainNames[1].name].address);
 
   console.log("Waiting for IBC connection...");
   const link = await linkPromise;
 
   console.log("Creating IBC channel...");
-  const channels = await createIbcChannel(link, contracts[chainNames[0]].ibcPortId, contracts[chainNames[1]].ibcPortId);
+  const channels = await createIbcChannel(link, contracts[chainNames[0].name].ibcPortId, contracts[chainNames[1].name].ibcPortId);
 
   channelId1 = channels.src.channelId;
   channelId2 = channels.dest.channelId;

@@ -16,8 +16,8 @@ import {
 // import { State as ChannelState } from "secretjs/src/grpc_gateway/ibc/core/channel/v1/channel.pb";
 import { Order } from "secretjs/dist/protobuf/ibc/core/channel/v1/channel";
 
-export const chain1RPC = "http://localhost:26657";
-export const chain2RPC = "http://localhost:36657";
+export const chain1RPC = "http://localsecret-1:26657";
+export const chain2RPC = "http://localsecret-2:26657";
 
 export class Contract {
   address: string = "";

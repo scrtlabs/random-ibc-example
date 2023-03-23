@@ -35,3 +35,11 @@ services:
   contract-uploader:
     container_name: uploader
     image: "ghcr.io/scrtlabs/random-proxy-contract-uploader:v1.0.0"
+    depends_on:
+      - localsecret-1
+      - localsecret-2
+      - relayer
+
+  random-proxy-tester:
+    container_name: proxy
+    image: "ghcr.io/scrtlabs/random-proxy-tester:v1.0.0"

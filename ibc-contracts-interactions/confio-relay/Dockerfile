@@ -1,6 +1,12 @@
 # Use the official Node.js LTS image as the base image
 FROM node:lts
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    #### Base utilities ####
+    netcat \
+    && rm -rf /var/lib/apt/lists/*
+
 # Set the working directory
 WORKDIR /app
 

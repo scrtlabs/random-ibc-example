@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Set the contract address
 contract="secret18vd8fpwxzck93qlwghaj6arh4p7c5n8978vsyg"
 

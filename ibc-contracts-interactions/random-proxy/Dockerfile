@@ -28,4 +28,4 @@ COPY c.mnemonic a.mnemonic
 RUN ./configure-cli.sh
 
 # Run the script when the container starts
-CMD ["send_random_request.sh"]
+CMD ["./send_random_request.sh"]
