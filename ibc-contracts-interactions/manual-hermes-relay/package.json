@@ -3,7 +3,7 @@
   "version": "1.4.0",
   "license": "MIT",
   "scripts": {
-    "test": "make -C ../ibc-contract && jest --forceExit"
+    "test": "make -C ../proxy-contract && jest --forceExit"
   },
   "devDependencies": {
     "@confio/relayer": "0.0.0-main-3b30964",

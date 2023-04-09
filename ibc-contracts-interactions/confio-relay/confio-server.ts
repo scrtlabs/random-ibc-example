@@ -34,7 +34,7 @@ let readonly2: SecretNetworkClient;
 
 const chain1Address = "http://localsecret-1:1317"
 const chain2Address = "http://localsecret-2:1317"
-//../ibc-contract/
+//../proxy-contract/
 const pathToContract = `${__dirname}/../ibc.wasm`
 
 let wasmCode: Uint8Array;

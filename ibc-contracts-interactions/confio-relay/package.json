@@ -3,7 +3,7 @@
   "version": "1.4.0",
   "license": "MIT",
   "scripts": {
-    "test": "make -C ../ibc-contract",
+    "test": "make -C ../proxy-contract",
     "build": "tsc"
   },
   "devDependencies": {

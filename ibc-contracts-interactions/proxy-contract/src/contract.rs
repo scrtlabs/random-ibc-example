@@ -2,11 +2,15 @@ use cosmwasm_std::{
     entry_point, from_binary, to_binary, Binary, Deps, DepsMut, Env, Ibc3ChannelOpenResponse,
     IbcBasicResponse, IbcChannelCloseMsg, IbcChannelConnectMsg, IbcChannelOpenMsg,
     IbcChannelOpenResponse, IbcMsg, IbcPacketAckMsg, IbcPacketReceiveMsg, IbcPacketTimeoutMsg,
-    IbcReceiveResponse, IbcTimeout, MessageInfo, Response, StdResult,
+    IbcReceiveResponse, IbcTimeout, MessageInfo, Response, StdError, StdResult, WasmMsg,
 };
+use schemars::schema::SingleOrVec::Vec;
 
+use crate::msg::PacketMsg::RandomResponse;
 use crate::msg::{ExecuteMsg, InstantiateMsg, PacketMsg, QueryMsg};
-use crate::state::{Channel, Operation, StoredLifeAnswer};
+use crate::state::{load_callback, save_callback, Channel, Operation, StoredRandomAnswer};
+use crate::utils::verify_callback;
+use secret_toolkit_crypto::{sha_256, Prng};
 
 pub const IBC_APP_VERSION: &str = "ibc-v1";
 const PACKET_LIFETIME: u64 = 60 * 60;
@@ -61,10 +65,18 @@ pub fn execute(
             }))
         }
 
-        ExecuteMsg::RequestLifeAnswerFromOtherChain { job_id } => {
+        // RequestRandom comes from a contract on the consuming side
+        ExecuteMsg::RequestRandom { job_id, callback } => {
+            if !verify_callback(&callback) {
+                deps.api
+                    .debug("Failed to verify callback! (trying to use sent_funds?)");
+                return Err(StdError::generic_err("Failed to verify callback"));
+            }
+
             let channel_id = Channel::get_last_opened(deps.storage)?;
-            let packet = PacketMsg::RequestLifeAnswer {
+            let packet = PacketMsg::RequestRandom {
                 job_id: job_id.clone(),
+                length: None,
             };
 
             Operation::save_last(
@@ -77,6 +89,8 @@ pub fn execute(
                     ],
                 },
             )?;
+
+            save_callback(deps.storage, callback)?;
 
             Ok(Response::new().add_message(IbcMsg::SendPacket {
                 channel_id,
@@ -93,7 +107,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::LastIbcOperation {} => Ok(to_binary(&Operation::get_last(deps.storage)?)?),
 
         QueryMsg::ViewReceivedLifeAnswer {} => {
-            Ok(to_binary(&StoredLifeAnswer::get(deps.storage)?)?)
+            Ok(to_binary(&StoredRandomAnswer::get(deps.storage)?)?)
         }
     }
 }
@@ -239,13 +253,20 @@ pub fn ibc_packet_receive(
             response = response.set_ack(to_binary(&res).unwrap());
         }
 
-        PacketMsg::RequestLifeAnswer { .. } => {
-
+        // todo: return random with different lengths
+        PacketMsg::RequestRandom { job_id, .. } => {
             deps.api.debug(&format!("{:?}", env));
 
-            let random = env.block.random.unwrap_or(Binary::from_base64("V1RGVEhJU05PV09SSw").unwrap());
+            // todo: handle random not in block for some reason?
+            let random = env.block.random.unwrap();
 
-            let res = PacketMsg::ReceiveLifeAnswer { life_answer: random.to_string() };
+            let mut rng = Prng::new(random.as_slice(), job_id.as_bytes());
+            let rand_for_job = hex::encode(rng.rand_bytes());
+
+            let res = PacketMsg::RandomResponse {
+                random: rand_for_job,
+                job_id,
+            };
             response = response.set_ack(to_binary(&res).unwrap());
         }
 
@@ -284,16 +305,59 @@ pub fn ibc_packet_ack(
 
     let ack_data = from_binary(&msg.acknowledgement.data)?;
     match ack_data {
-        PacketMsg::Message { .. } => {}
+        PacketMsg::Message { .. } => Ok(IbcBasicResponse::default()),
 
-        PacketMsg::ReceiveLifeAnswer { life_answer } => {
-            StoredLifeAnswer::save(deps.storage, life_answer)?;
+        PacketMsg::RandomResponse { job_id, random } => {
+            // todo: support more than 1 concurrent job
+            let callback = load_callback(deps.storage)?;
+
+            let msg = create_random_response_callback(callback, job_id, random)?;
+
+            Ok(IbcBasicResponse::default().add_message(msg))
         }
 
-        _ => {}
+        _ => Ok(IbcBasicResponse::default()),
     }
+}
 
-    Ok(IbcBasicResponse::default())
+fn create_random_response_callback(
+    callback: WasmMsg,
+    job_id: String,
+    random: String,
+) -> StdResult<WasmMsg> {
+    match callback {
+        WasmMsg::Execute {
+            contract_addr,
+            code_hash,
+            ..
+        } => Ok(WasmMsg::Execute {
+            contract_addr,
+            code_hash,
+            msg: Binary::from(
+                serde_json_wasm::to_string(&PacketMsg::RandomResponse { job_id, random })
+                    .unwrap()
+                    .as_bytes(),
+            ),
+            funds: vec![],
+        }),
+        WasmMsg::Instantiate {
+            code_id,
+            code_hash,
+            label,
+            ..
+        } => Ok(WasmMsg::Instantiate {
+            code_id,
+            code_hash,
+            funds: vec![],
+            label,
+            msg: Binary::from(
+                serde_json_wasm::to_string(&PacketMsg::RandomResponse { job_id, random })
+                    .unwrap()
+                    .as_bytes(),
+            ),
+        }),
+        _ => Err(StdError::generic_err("Invalid callback type")),
+    }
 }
 
 #[entry_point]

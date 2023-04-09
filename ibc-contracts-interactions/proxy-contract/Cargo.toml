@@ -2,13 +2,14 @@
 name = "ibc"
 version = "0.0.1"
 authors = ["Enigma <info@enigma.co>"]
-edition = "2018"
+edition = "2021"
 description = "A Test contract intended to use in system tests for the Secret Netowrk"
 license = "MIT"
 exclude = [
   # Those files are cosmwasm-opt artifacts. You might want to commit them for convenience but they should not be part of the source code publication.
   "ibc.wasm",
 ]
+resolver = "2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
@@ -33,7 +34,7 @@ stargate = []
 ibc3 = ["stargate"]
 
 [dependencies]
-cosmwasm-std = { git = "https://github.com/scrtlabs/cosmwasm", rev = "8ee395ba033c392d7170c971df97f085edaed2d9", package = "secret-cosmwasm-std", features = [
+cosmwasm-std = { git = "https://github.com/scrtlabs/cosmwasm", default-features = false, rev = "8ee395ba033c392d7170c971df97f085edaed2d9", package = "secret-cosmwasm-std", features = [
   "stargate",
   "ibc3",
   "random"
@@ -42,9 +43,11 @@ cosmwasm-storage = { git = "https://github.com/scrtlabs/cosmwasm", rev = "8ee395
 
 schemars = "0.8.1"
 serde = { version = "1.0.114", default-features = false, features = ["derive"] }
-secret-toolkit = "0.7.0"
+secret-toolkit = { version = "0.7.0" }
+secret-toolkit-crypto = { version = "0.7.0", default-features = false, features = ["rand", "hash"] }
+hex = "0.4.3"
 serde-json-wasm = "0.5.0"
 
 [patch.crates-io]
-cosmwasm-std = { git = "https://github.com/scrtlabs/cosmwasm", rev = "8ee395ba033c392d7170c971df97f085edaed2d9", package = "secret-cosmwasm-std" }
+cosmwasm-std = { git = "https://github.com/scrtlabs/cosmwasm", default-features = false, rev = "8ee395ba033c392d7170c971df97f085edaed2d9", package = "secret-cosmwasm-std" }
 cosmwasm-storage = { git = "https://github.com/scrtlabs/cosmwasm", rev = "8ee395ba033c392d7170c971df97f085edaed2d9", package = "secret-cosmwasm-storage" }

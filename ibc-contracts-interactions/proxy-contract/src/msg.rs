@@ -1,3 +1,4 @@
+use cosmwasm_std::WasmMsg;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -7,11 +8,11 @@ pub enum InstantiateMsg {
     Init {},
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
     SendIbcPacket { message: String },
-    RequestLifeAnswerFromOtherChain { job_id: String },
+    RequestRandom { job_id: String, callback: WasmMsg },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
@@ -25,6 +26,6 @@ pub enum QueryMsg {
 #[serde(rename_all = "snake_case")]
 pub enum PacketMsg {
     Message { value: String },
-    RequestLifeAnswer { job_id: String },
-    ReceiveLifeAnswer { life_answer: String },
+    RequestRandom { job_id: String, length: Option<u32> },
+    RandomResponse { job_id: String, random: String },
 }

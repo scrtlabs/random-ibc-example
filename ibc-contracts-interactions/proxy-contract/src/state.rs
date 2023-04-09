@@ -1,11 +1,12 @@
-use cosmwasm_std::{StdError, StdResult, Storage};
+use cosmwasm_std::{StdError, StdResult, Storage, WasmMsg};
 use schemars::JsonSchema;
 use secret_toolkit::storage::Item;
 use serde::{Deserialize, Serialize};
 
 pub const KEY_LAST_IBC_OPERATION: &[u8] = b"last_op";
 pub const KEY_LAST_OPENED_CHANNEL: &[u8] = b"opened_channel";
-pub const KEY_STORED_LIFE_ANSWER: &[u8] = b"life_answer";
+pub const KEY_STORED_RANDOM: &[u8] = b"rand";
+pub const KEY_CALLBACK: &[u8] = b"cb";
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
@@ -43,17 +44,28 @@ impl Channel {
     }
 }
 
-pub static STORED_LIFE_ANSWER: Item<String> = Item::new(KEY_STORED_LIFE_ANSWER);
+pub static STORED_RANDOM: Item<String> = Item::new(KEY_STORED_RANDOM);
+pub static STORED_CALLBACK: Item<WasmMsg> = Item::new(KEY_CALLBACK);
 
-pub struct StoredLifeAnswer {}
-impl StoredLifeAnswer {
+pub struct StoredRandomAnswer {}
+impl StoredRandomAnswer {
     pub fn get(store: &dyn Storage) -> StdResult<String> {
-        STORED_LIFE_ANSWER.load(store).map_err(|_err| {
+        STORED_RANDOM.load(store).map_err(|_err| {
             StdError::generic_err("no life answer was received on this contract yet")
         })
     }
 
-    pub fn save(store: &mut dyn Storage, life_answer: String) -> StdResult<()> {
-        STORED_LIFE_ANSWER.save(store, &life_answer)
+    pub fn save(store: &mut dyn Storage, random: String) -> StdResult<()> {
+        STORED_RANDOM.save(store, &random)
     }
+}
+
+pub fn load_callback(store: &dyn Storage) -> StdResult<WasmMsg> {
+    STORED_CALLBACK.load(store).map_err(|_err| {
+        StdError::generic_err("no life answer was received on this contract yet")
+    })
+}
+
+pub fn save_callback(store: &mut dyn Storage, msg: WasmMsg) -> StdResult<()> {
+    STORED_CALLBACK.save(store, &msg)
 }
