@@ -1,4 +1,4 @@
-use cosmwasm_std::{Binary, WasmMsg};
+use cosmwasm_std::{Binary, ContractInfo};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -12,7 +12,7 @@ pub enum InstantiateMsg {
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
     SendIbcPacket { message: String },
-    RequestRandom { job_id: String, callback: WasmMsg },
+    RequestRandom { job_id: String, callback: CallbackInfo }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
@@ -38,4 +38,11 @@ pub enum RandomCallback {
         job_id: String,
         msg: Option<Binary>,
     },
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct CallbackInfo {
+    pub msg: Option<Binary>,
+    pub contract: ContractInfo,
 }

@@ -7,7 +7,7 @@ use cosmwasm_std::{
 use schemars::schema::SingleOrVec::Vec;
 
 use crate::msg::PacketMsg::RandomResponse;
-use crate::msg::{ExecuteMsg, InstantiateMsg, PacketMsg, QueryMsg, RandomCallback};
+use crate::msg::{CallbackInfo, ExecuteMsg, InstantiateMsg, PacketMsg, QueryMsg, RandomCallback};
 use crate::state::{load_callback, save_callback, Channel, Operation, StoredRandomAnswer};
 use crate::utils::verify_callback;
 use secret_toolkit_crypto::{sha_256, Prng};
@@ -67,11 +67,6 @@ pub fn execute(
 
         // RequestRandom comes from a contract on the consuming side
         ExecuteMsg::RequestRandom { job_id, callback } => {
-            if !verify_callback(&callback) {
-                deps.api
-                    .debug("Failed to verify callback! (trying to use sent_funds?)");
-                return Err(StdError::generic_err("Failed to verify callback"));
-            }
 
             let channel_id = Channel::get_last_opened(deps.storage)?;
             let packet = PacketMsg::RequestRandom {
@@ -321,43 +316,20 @@ pub fn ibc_packet_ack(
 }
 
 fn create_random_response_callback(
-    callback: WasmMsg,
+    callback: CallbackInfo,
     job_id: String,
     random: String,
 ) -> StdResult<WasmMsg> {
-    match callback {
-        WasmMsg::Execute {
-            contract_addr,
-            code_hash,
-            ..
-        } => Ok(WasmMsg::Execute {
-            contract_addr,
-            code_hash,
-            msg: to_binary(&RandomCallback::RandomResponse {
-                job_id,
-                random,
-                msg: None,
-            })?,
-            funds: vec![],
-        }),
-        WasmMsg::Instantiate {
-            code_id,
-            code_hash,
-            label,
-            ..
-        } => Ok(WasmMsg::Instantiate {
-            code_id,
-            code_hash,
-            funds: vec![],
-            label,
-            msg: to_binary(&RandomCallback::RandomResponse {
-                job_id,
-                random,
-                msg: None,
-            })?,
-        }),
-        _ => Err(StdError::generic_err("Invalid callback type")),
-    }
+    Ok(WasmMsg::Execute {
+        contract_addr: callback.contract.address.to_string(),
+        code_hash: callback.contract.code_hash,
+        msg: to_binary(&RandomCallback::RandomResponse {
+            job_id,
+            random,
+            msg: callback.msg,
+        })?,
+        funds: vec![],
+    })
 }
 
 #[entry_point]

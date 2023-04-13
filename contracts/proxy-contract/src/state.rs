@@ -2,6 +2,7 @@ use cosmwasm_std::{StdError, StdResult, Storage, WasmMsg};
 use schemars::JsonSchema;
 use secret_toolkit::storage::Item;
 use serde::{Deserialize, Serialize};
+use crate::msg::CallbackInfo;
 
 pub const KEY_LAST_IBC_OPERATION: &[u8] = b"last_op";
 pub const KEY_LAST_OPENED_CHANNEL: &[u8] = b"opened_channel";
@@ -45,7 +46,7 @@ impl Channel {
 }
 
 pub static STORED_RANDOM: Item<String> = Item::new(KEY_STORED_RANDOM);
-pub static STORED_CALLBACK: Item<WasmMsg> = Item::new(KEY_CALLBACK);
+pub static STORED_CALLBACK: Item<CallbackInfo> = Item::new(KEY_CALLBACK);
 
 pub struct StoredRandomAnswer {}
 impl StoredRandomAnswer {
@@ -60,12 +61,12 @@ impl StoredRandomAnswer {
     }
 }
 
-pub fn load_callback(store: &dyn Storage) -> StdResult<WasmMsg> {
+pub fn load_callback(store: &dyn Storage) -> StdResult<CallbackInfo> {
     STORED_CALLBACK.load(store).map_err(|_err| {
         StdError::generic_err("no life answer was received on this contract yet")
     })
 }
 
-pub fn save_callback(store: &mut dyn Storage, msg: WasmMsg) -> StdResult<()> {
+pub fn save_callback(store: &mut dyn Storage, msg: CallbackInfo) -> StdResult<()> {
     STORED_CALLBACK.save(store, &msg)
 }
