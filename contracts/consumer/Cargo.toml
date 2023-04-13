@@ -1,0 +1,34 @@
+[package]
+name = "consumer"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+opt-level = 3
+debug = false
+rpath = false
+lto = true
+debug-assertions = false
+codegen-units = 1
+panic = 'abort'
+incremental = false
+overflow-checks = true
+
+
+[dependencies]
+cosmwasm-std = { git = "https://github.com/scrtlabs/cosmwasm", default-features = false, rev = "8ee395ba033c392d7170c971df97f085edaed2d9", package = "secret-cosmwasm-std", features = [
+    "stargate",
+    "ibc3",
+    "random"
+] }
+secret-toolkit = { version = "0.7.0" }
+
+serde = { version = "1.0.114", default-features = false, features = ["derive"] }
+schemars = "0.8.1"
+
+[patch.crates-io]
+cosmwasm-std = { git = "https://github.com/scrtlabs/cosmwasm", default-features = false, rev = "8ee395ba033c392d7170c971df97f085edaed2d9", package = "secret-cosmwasm-std" }
+

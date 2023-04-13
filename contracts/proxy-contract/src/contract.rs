@@ -7,7 +7,7 @@ use cosmwasm_std::{
 use schemars::schema::SingleOrVec::Vec;
 
 use crate::msg::PacketMsg::RandomResponse;
-use crate::msg::{ExecuteMsg, InstantiateMsg, PacketMsg, QueryMsg};
+use crate::msg::{ExecuteMsg, InstantiateMsg, PacketMsg, QueryMsg, RandomCallback};
 use crate::state::{load_callback, save_callback, Channel, Operation, StoredRandomAnswer};
 use crate::utils::verify_callback;
 use secret_toolkit_crypto::{sha_256, Prng};
@@ -333,11 +333,11 @@ fn create_random_response_callback(
         } => Ok(WasmMsg::Execute {
             contract_addr,
             code_hash,
-            msg: Binary::from(
-                serde_json_wasm::to_string(&PacketMsg::RandomResponse { job_id, random })
-                    .unwrap()
-                    .as_bytes(),
-            ),
+            msg: to_binary(&RandomCallback::RandomResponse {
+                job_id,
+                random,
+                msg: None,
+            })?,
             funds: vec![],
         }),
         WasmMsg::Instantiate {
@@ -350,11 +350,11 @@ fn create_random_response_callback(
             code_hash,
             funds: vec![],
             label,
-            msg: Binary::from(
-                serde_json_wasm::to_string(&PacketMsg::RandomResponse { job_id, random })
-                    .unwrap()
-                    .as_bytes(),
-            ),
+            msg: to_binary(&RandomCallback::RandomResponse {
+                job_id,
+                random,
+                msg: None,
+            })?,
         }),
         _ => Err(StdError::generic_err("Invalid callback type")),
     }

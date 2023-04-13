@@ -17,5 +17,6 @@ COPY . .
 RUN npm install && npm run build
 
 # Define the entry point script
-COPY entrypoint.sh /
-ENTRYPOINT ["/entrypoint.sh"]
+COPY entrypoint.sh /app
+RUN chmod +x ./entrypoint.sh
+ENTRYPOINT ["./entrypoint.sh"]

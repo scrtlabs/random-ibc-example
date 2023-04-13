@@ -29,16 +29,16 @@ services:
         CHAINID: "secretdev-2"
         LOG_LEVEL: "trace"
     image: "ghcr.io/scrtlabs/localsecret:v1.9.0-random"
-  relayer:
-    container_name: hermes-relayer
-    image: "hermes:test"
+#  relayer:
+#    container_name: hermes-relayer
+#    image: "hermes:test"
   contract-uploader:
     container_name: uploader
     image: "ghcr.io/scrtlabs/random-proxy-contract-uploader:v1.0.0"
     depends_on:
       - localsecret-1
       - localsecret-2
-      - relayer
+      # - relayer
 
   random-proxy-tester:
     container_name: proxy
