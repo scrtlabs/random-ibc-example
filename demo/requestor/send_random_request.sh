@@ -4,7 +4,7 @@ set -ex
 
 # Set the contract address
 contract="secret18vd8fpwxzck93qlwghaj6arh4p7c5n8978vsyg"
-code_hash="cf312d98a8c95d759cf72d779da3e702d90c0628da6dbd8b0e50889bfc73180e"
+code_hash="1e3d516013e80cfcdd5be8838833c2627698c9a678a3c2494917a2255277763a"
 
 # config cli
 secretcli config node http://localsecret-1:26657
@@ -32,7 +32,7 @@ done
 echo "IBC channel-0 is open!"
 
 # Wait for a few seconds for the chain to set up in case all the images are starting together
-sleep(10)
+sleep 10
 
 function wait_for_tx () {
     echo "Waiting for tx: $1"
@@ -79,3 +79,6 @@ SEND_TX_HASH=$(
 wait_for_tx "$SEND_TX_HASH" "Waiting for transfer to finish on-chain..."
 
 secretcli q compute tx "$SEND_TX_HASH" --output json | jq
+
+# Start the web server
+python3 ui/app.py
