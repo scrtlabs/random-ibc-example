@@ -7,8 +7,7 @@ import time
 app = Flask(__name__)
 
 # Set the contract address
-contract = "secret18vd8fpwxzck93qlwghaj6arh4p7c5n8978vsyg"
-code_hash = "1e3d516013e80cfcdd5be8838833c2627698c9a678a3c2494917a2255277763a"
+contract = "secret10pyejy66429refv3g35g2t7am0was7ya6hvrzf"
 
 
 def secretcli(args, json_output=True):
@@ -33,9 +32,9 @@ def wait_for_tx(tx_hash, message="Waiting for tx to finish on-chain..."):
 @app.route("/")
 def index():
     try:
-        response = secretcli(["tx", "compute", "query", contract, '{"get_last_random": {}}'])
-        random_value = response["result"]["random"]
-        block_height = response["result"]["block_height"]
+        response = secretcli(["q", "compute", "query", contract, '{"last_random": {}}'])
+        random_value = response["random"]
+        block_height = response["height"]
     except Exception as e:
         random_value = "Error: {}".format(e)
         block_height = "Error: {}".format(e)
