@@ -3,7 +3,7 @@
 set -ex
 
 # Set the contract address
-contract="secret18vd8fpwxzck93qlwghaj6arh4p7c5n8978vsyg"
+contract="secret15k9rjfpu4jhfwtgdgswpy46fa4s0af54ncgwmk"
 code_hash="1e3d516013e80cfcdd5be8838833c2627698c9a678a3c2494917a2255277763a"
 
 # config cli

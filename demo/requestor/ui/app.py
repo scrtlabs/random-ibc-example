@@ -7,7 +7,7 @@ import time
 app = Flask(__name__)
 
 # Set the contract address
-contract = "secret10pyejy66429refv3g35g2t7am0was7ya6hvrzf"
+contract = "secret1c2mfxp0y7sc3fxfknjghx4fr9v97cav3l032kd"
 
 
 def secretcli(args, json_output=True):
@@ -45,7 +45,8 @@ def index():
 @app.route("/update-random")
 def update_random():
     try:
-        tx = secretcli(["tx", "compute", "execute", contract, '{"do_something": {}}', "--from", "mywallet", "--gas", "200000"])
+        tx = secretcli(["tx", "compute", "execute", contract, '{"do_something": {}}', "--from", "a", "--gas", "200000",
+                        "-y"])
         tx_hash = tx["hash"]
         wait_for_tx(tx_hash)
         response = secretcli(["q", "compute", "query", contract, '{"last_random": {}}'])

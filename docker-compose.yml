@@ -11,9 +11,9 @@ services:
       - "9091:9091"
       - "1337:1337"
       - "1317:1317"
-    image: "ghcr.io/scrtlabs/localsecret:v1.9.0-random"
-    environment:
-        LOG_LEVEL: "trace"
+    image: "ghcr.io/scrtlabs/localsecret:v1.9.0-beta.1-random"
+#    environment:
+#        LOG_LEVEL: "trace"
   localsecret-2:
     container_name: localsecret-2
     # ports are only here in case interaction 
@@ -27,8 +27,8 @@ services:
       - "3317:1317"
     environment:
         CHAINID: "secretdev-2"
-        LOG_LEVEL: "trace"
-    image: "ghcr.io/scrtlabs/localsecret:v1.9.0-random"
+        # LOG_LEVEL: "trace"
+    image: "ghcr.io/scrtlabs/localsecret:v1.9.0-beta.1-random"
 #  relayer:
 #    container_name: hermes-relayer
 #    image: "hermes:test"
