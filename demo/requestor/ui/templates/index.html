@@ -10,5 +10,20 @@
 <p>{{ random_value }}</p>
 <h2>Block Height</h2>
 <p>{{ block_height }}</p>
+<button id="update-random-btn">Update Random Value</button>
+<script>
+    const updateRandomBtn = document.getElementById("update-random-btn");
+
+    updateRandomBtn.addEventListener("click", async () => {
+        const response = await fetch("/update-random");
+        const json = await response.json();
+        if (json.random_value && json.block_height) {
+            document.querySelector("p").innerText = json.random_value;
+            document.querySelectorAll("p")[1].innerText = json.block_height;
+        } else {
+            alert(`Error: ${json.error}`);
+        }
+    });
+</script>
 </body>
 </html>

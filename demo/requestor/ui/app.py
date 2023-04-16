@@ -1,7 +1,7 @@
 import os
 import json
 import subprocess
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import time
 
 app = Flask(__name__)
@@ -40,6 +40,20 @@ def index():
         block_height = "Error: {}".format(e)
 
     return render_template("index.html", random_value=random_value, block_height=block_height)
+
+
+@app.route("/update-random")
+def update_random():
+    try:
+        tx = secretcli(["tx", "compute", "execute", contract, '{"do_something": {}}', "--from", "mywallet", "--gas", "200000"])
+        tx_hash = tx["hash"]
+        wait_for_tx(tx_hash)
+        response = secretcli(["q", "compute", "query", contract, '{"last_random": {}}'])
+        random_value = response["random"]
+        block_height = response["height"]
+        return {"random_value": random_value, "block_height": block_height}
+    except Exception as e:
+        return {"error": str(e)}
 
 
 if __name__ == "__main__":
