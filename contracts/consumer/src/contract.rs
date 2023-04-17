@@ -12,7 +12,7 @@ pub const KEY_STORED_RANDOM_CONTRACT: &[u8] = b"rand";
 pub const KEY_STORED_RANDOM_RESULT: &[u8] = b"rand_result";
 
 pub static STORED_RANDOM: Item<ContractInfo> = Item::new(KEY_STORED_RANDOM_CONTRACT);
-pub static STORED_RANDOM_RESULT: Item<(u64, String)> = Item::new(KEY_STORED_RANDOM_CONTRACT);
+pub static STORED_RANDOM_RESULT: Item<(u64, String)> = Item::new(KEY_STORED_RANDOM_RESULT);
 
 #[entry_point]
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
@@ -47,10 +47,9 @@ pub fn execute(
     _info: MessageInfo,
     msg: ExecuteMsg,
 ) -> StdResult<Response> {
-    let rand_provider = get_contract(deps.storage)?;
-
     match msg {
         ExecuteMsg::DoSomething { .. } => {
+            let rand_provider = get_contract(deps.storage)?;
             let msg = get_random_msg(
                 env.clone(),
                 rand_provider,

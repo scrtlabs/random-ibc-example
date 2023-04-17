@@ -18,15 +18,12 @@ def secretcli(args, json_output=True):
     return json.loads(result) if json_output else result
 
 
-def wait_for_tx(tx_hash, message="Waiting for tx to finish on-chain..."):
-    print(message)
+def wait_for_query_change(prev_random):
     while True:
-        try:
-            result = secretcli(["q", "compute", "tx", tx_hash])
-            return result
-        except subprocess.CalledProcessError:
-            print(".", end="")
-            time.sleep(1)
+        response = secretcli(["q", "compute", "query", contract, '{"last_random": {}}'])
+        if response["random"] != prev_random:
+            return response
+        time.sleep(1)
 
 
 @app.route("/")
@@ -45,11 +42,11 @@ def index():
 @app.route("/update-random")
 def update_random():
     try:
+        prev_random = secretcli(["q", "compute", "query", contract, '{"last_random": {}}'])["random"]
         tx = secretcli(["tx", "compute", "execute", contract, '{"do_something": {}}', "--from", "a", "--gas", "200000",
                         "-y"])
-        tx_hash = tx["hash"]
-        wait_for_tx(tx_hash)
-        response = secretcli(["q", "compute", "query", contract, '{"last_random": {}}'])
+        tx_hash = tx["txhash"]
+        response = wait_for_query_change(prev_random)
         random_value = response["random"]
         block_height = response["height"]
         return {"random_value": random_value, "block_height": block_height}

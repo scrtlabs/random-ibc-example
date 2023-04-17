@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/styles.css">
     <title>Contract Query</title>
 </head>
 <body>
@@ -10,19 +11,35 @@
 <p>{{ random_value }}</p>
 <h2>Block Height</h2>
 <p>{{ block_height }}</p>
+<h3>Time Elapsed</h3>
+<p id="time-elapsed">0.0s</p>
 <button id="update-random-btn">Update Random Value</button>
+<div id="loader"></div>
 <script>
     const updateRandomBtn = document.getElementById("update-random-btn");
+    const loader = document.getElementById("loader");
+    const timeElapsedDisplay = document.getElementById("time-elapsed");
 
     updateRandomBtn.addEventListener("click", async () => {
+        updateRandomBtn.disabled = true;
+        loader.style.display = "block";
+        const startTime = performance.now();
+
         const response = await fetch("/update-random");
         const json = await response.json();
         if (json.random_value && json.block_height) {
             document.querySelector("p").innerText = json.random_value;
             document.querySelectorAll("p")[1].innerText = json.block_height;
+
+            const endTime = performance.now();
+            const timeElapsed = (endTime - startTime) / 1000;
+            timeElapsedDisplay.innerText = `${timeElapsed.toFixed(1)}s`;
         } else {
             alert(`Error: ${json.error}`);
         }
+
+        loader.style.display = "none";
+        updateRandomBtn.disabled = false;
     });
 </script>
 </body>
