@@ -30,5 +30,5 @@ serde = { version = "1.0.114", default-features = false, features = ["derive"] }
 schemars = "0.8.1"
 
 [patch.crates-io]
-cosmwasm-std = { git = "https://github.com/scrtlabs/cosmwasm", default-features = false, rev = "8ee395ba033c392d7170c971df97f085edaed2d9", package = "secret-cosmwasm-std" }
+cosmwasm-std = { git = "https://github.com/scrtlabs/cosmwasm", rev = "8ee395ba033c392d7170c971df97f085edaed2d9", package = "secret-cosmwasm-std" }
 
