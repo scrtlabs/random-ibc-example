@@ -20,33 +20,51 @@ def secretcli(args, json_output=True):
 
 def wait_for_query_change(prev_random):
     while True:
-        response = secretcli(["q", "compute", "query", contract, '{"last_random": {}}'])
-        if response["random"] != prev_random:
+        response = {}
+        try:
+            response = secretcli(["q", "compute", "query", contract, '{"last_random": {}}'])
+        except:
+            pass
+
+        if "random" in response and response["random"] != prev_random:
             return response
+
         time.sleep(1)
 
 
 @app.route("/")
 def index():
+    return render_template("index.html")
+
+
+@app.route("/refresh")
+def get_current_values():
     try:
-        response = secretcli(["q", "compute", "query", contract, '{"last_random": {}}'])
+        response = secretcli(["q", "compute", "query", contract, '{"last_random": {}}'])["random"]
         random_value = response["random"]
         block_height = response["height"]
-    except Exception as e:
-        random_value = "Error: {}".format(e)
-        block_height = "Error: {}".format(e)
+        return {"random_value": random_value, "block_height": block_height}
+    except:
+        # no value exists - we're waiting for 1st random
+        response = wait_for_query_change(None)
+        random_value = response["random"]
+        block_height = response["height"]
+        return {"random_value": random_value, "block_height": block_height}
 
-    return render_template("index.html", random_value=random_value, block_height=block_height)
 
 
 @app.route("/update-random")
 def update_random():
+    prev_random = None
     try:
-        prev_random = secretcli(["q", "compute", "query", contract, '{"last_random": {}}'])["random"]
+        prev_random = secretcli(["q", "compute", "query", contract, '{"last_random": {}}'])
+    except:
+        return {"error": "Still waiting for initial random"}
+
+    try:
         tx = secretcli(["tx", "compute", "execute", contract, '{"do_something": {}}', "--from", "a", "--gas", "200000",
                         "-y"])
-        tx_hash = tx["txhash"]
-        response = wait_for_query_change(prev_random)
+        response = wait_for_query_change(prev_random["random"])
         random_value = response["random"]
         block_height = response["height"]
         return {"random_value": random_value, "block_height": block_height}
