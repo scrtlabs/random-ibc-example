@@ -10,7 +10,7 @@ The system consists of two localsecret chains, that simulate Secret Network and 
 This demo provides an example of how to interact with the Proxy Contract to fetch random numbers, as well as a development playground for applications. The target audience are app developers on chains other than Secret Network who want to use random numbers in their apps.
 
 In a real-world scenario, the proxy contract will be deployed once, and there will be many consuming contracts. The proxy contract will produce a *different, non-predictable* number for 
-each request it receives. You can read more about random numbers on Secret Network in the [documentation](https://docs.scrt.network)
+each request it receives. You can read more about random numbers on Secret Network in the [documentation](https://docs.scrt.network/secret-network-documentation/development/secret-contract-fundamentals/available-native-features-modules/secret-vrf-on-chain-randomness).
 
 ## Contracts
 
@@ -43,10 +43,11 @@ docker compose up
 #### Interact with the Consumer Contract
 
 The consumer contract exposes an interface to display the latest received random number, and request a new one.
-You can access this web interface via the browser at (will be available once the contract is instantiated):
+You can access this web interface via the browser at:
 ```
 http://localhost:8080
 ```
+The endpoint will be available once the contract is instantiated.
 
 ### Use demo as a development playground
 
