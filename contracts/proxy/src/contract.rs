@@ -96,6 +96,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::LastIbcOperation {} => Ok(to_binary(&"No operations".to_string())?),
 
         QueryMsg::ViewReceivedLifeAnswer {} => {
+            // todo the StoredRandomAnswer is never saved to
             Ok(to_binary(&StoredRandomAnswer::get(deps.storage)?)?)
         }
     }
