@@ -88,9 +88,8 @@ async function uploadAndInstantiateContract(chainName: string, client: SecretNet
     console.error(`Failed to store contract: ${JSON.stringify(e)}`);
     throw e
   }
-
-
 }
+
 let channelId1 = "";
 let channelId2 = "";
 const runRelayer = async () => {
