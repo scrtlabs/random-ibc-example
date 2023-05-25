@@ -7,7 +7,7 @@ import time
 app = Flask(__name__)
 
 # Set the contract address
-contract = "secret1c2mfxp0y7sc3fxfknjghx4fr9v97cav3l032kd"
+contract = os.environ["CONSUMER_CONTRACT"]
 
 
 def secretcli(args, json_output=True):

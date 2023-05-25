@@ -39,9 +39,8 @@ services:
       - localsecret-1
       - localsecret-2
       # - relayer
-
   random-proxy-tester:
-    container_name: proxy
+    container_name: proxy-tester
     image: "ghcr.io/scrtlabs/random-proxy-tester:v1.0.0"
     ports:
       - "8080:8080"
