@@ -28,6 +28,8 @@ The main components of the Consumer Contract are:
 In this example, the interaction with the proxy is done using callback methods. The consumer requests a random number, and the proxy will call the RandomResponse method of the 
 calling contract once the number is available. This is an example of such an interface, and real-world implementation may differ.
 
+![Messages Diagram](ibc-random.png "Messages Diagram")
+
 ### Build and Run Demo
 
 #### Build Proxy and Consumer Images
