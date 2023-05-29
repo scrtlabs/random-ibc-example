@@ -298,7 +298,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ibc"
+name = "ibc-proxy"
 version = "0.0.1"
 dependencies = [
  "hex",
