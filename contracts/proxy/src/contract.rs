@@ -94,17 +94,17 @@ pub fn execute(
     }
 }
 
-#[entry_point]
-pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
-    match msg {
-        QueryMsg::LastIbcOperation {} => Ok(to_binary(&"No operations".to_string())?),
-
-        QueryMsg::ViewReceivedLifeAnswer {} => {
-            // todo the StoredRandomAnswer is never saved to
-            Ok(to_binary(&StoredRandomAnswer::get(deps.storage)?)?)
-        }
-    }
-}
+// #[entry_point]
+// pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
+//     match msg {
+//         QueryMsg::LastIbcOperation {} => Ok(to_binary(&"No operations".to_string())?),
+//
+//         QueryMsg::ViewReceivedLifeAnswer {} => {
+//             // todo the StoredRandomAnswer is never saved to
+//             Ok(to_binary(&StoredRandomAnswer::get(deps.storage)?)?)
+//         }
+//     }
+// }
 
 #[entry_point]
 pub fn ibc_channel_open(
@@ -159,22 +159,22 @@ pub fn ibc_packet_receive(
             response = response.set_ack(to_binary(&res).unwrap());
         }
 
-        // todo: return random with different lengths
-        PacketMsg::RequestRandom { job_id, .. } => {
-            deps.api.debug(&format!("{:?}", env));
-
-            // todo: handle random not in block for some reason?
-            let random = env.block.random.unwrap();
-
-            let mut rng = Prng::new(random.as_slice(), job_id.as_bytes());
-            let rand_for_job = hex::encode(rng.rand_bytes());
-
-            let res = PacketMsg::RandomResponse {
-                random: rand_for_job,
-                job_id,
-            };
-            response = response.set_ack(to_binary(&res).unwrap());
-        }
+        // // todo: return random with different lengths
+        // PacketMsg::RequestRandom { job_id, .. } => {
+        //     deps.api.debug(&format!("{:?}", env));
+        //
+        //     // todo: handle random not in block for some reason?
+        //     let random = env.block.random.unwrap();
+        //
+        //     let mut rng = Prng::new(random.as_slice(), job_id.as_bytes());
+        //     let rand_for_job = hex::encode(rng.rand_bytes());
+        //
+        //     let res = PacketMsg::RandomResponse {
+        //         random: rand_for_job,
+        //         job_id,
+        //     };
+        //     response = response.set_ack(to_binary(&res).unwrap());
+        // }
 
         _ => {}
     }

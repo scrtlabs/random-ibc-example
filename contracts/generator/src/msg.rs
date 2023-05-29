@@ -8,12 +8,9 @@ pub enum InstantiateMsg {
     Init {},
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-#[serde(rename_all = "snake_case")]
-pub enum ExecuteMsg {
-    SendIbcPacket { message: String },
-    RequestRandom { job_id: String, callback: CallbackInfo }
-}
+// #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+// #[serde(rename_all = "snake_case")]
+// pub enum ExecuteMsg {}
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
@@ -30,19 +27,19 @@ pub enum PacketMsg {
     RandomResponse { job_id: String, random: String },
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-pub enum RandomCallback {
-    RandomResponse {
-        random: String,
-        job_id: String,
-        msg: Option<Binary>,
-    },
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-pub struct CallbackInfo {
-    pub msg: Option<Binary>,
-    pub contract: ContractInfo,
-}
+// #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+// #[serde(rename_all = "snake_case")]
+// pub enum RandomCallback {
+//     RandomResponse {
+//         random: String,
+//         job_id: String,
+//         msg: Option<Binary>,
+//     },
+// }
+//
+// #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+// #[serde(rename_all = "snake_case")]
+// pub struct CallbackInfo {
+//     pub msg: Option<Binary>,
+//     pub contract: ContractInfo,
+// }
