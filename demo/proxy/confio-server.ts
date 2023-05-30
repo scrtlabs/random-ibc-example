@@ -35,15 +35,14 @@ let readonly2: SecretNetworkClient;
 const chain1Address = "http://localsecret-1:1317"
 const chain2Address = "http://localsecret-2:1317"
 //../proxy-contract/
-const pathToContract = `${__dirname}/../ibc.wasm`
+const pathToDestinationContract = `${__dirname}/../ibc_proxy.wasm`
+const pathToSourceContract = `${__dirname}/../ibc_random_generator.wasm`
 
-let wasmCode: Uint8Array;
 const chainNames = [{name: "secretdev-1", address: chain1Address }, {name: "secretdev-2", address: chain2Address}];
 const contracts = {
   [chainNames[0].name]: new Contract,
   [chainNames[1].name]: new Contract,
 };
-
 
 
 const populateAccounts = async (accountList: { address: string; mnemonic: any; walletAmino: AminoWallet; walletProto: Wallet; secretjs: SecretNetworkClient; }[], mnemonics: string | any[], chainId: string, endpoint: string) => {
@@ -65,9 +64,9 @@ const populateAccounts = async (accountList: { address: string; mnemonic: any; w
   }
 }
 
-async function uploadAndInstantiateContract(chainName: string, client: SecretNetworkClient) {
+async function uploadAndInstantiateContract(chainName: string, client: SecretNetworkClient, wasmCode: Uint8Array) {
   let contract = new Contract
-  console.log("Storing contracts on " + chainName + "...");
+  console.log("Storing contract on " + chainName + "...");
 
   try {
     let tx: TxResponse = await storeContracts(client, [wasmCode]);
@@ -75,7 +74,7 @@ async function uploadAndInstantiateContract(chainName: string, client: SecretNet
     // @ts-ignore
     contract.codeId = Number(tx.arrayLog.find((x) => x.key === "code_id").value);
 
-    console.log("Instantiating contracts on " + chainName + "...");
+    console.log("Instantiating contract on " + chainName + "...");
     tx = await instantiateContracts(client, [contract], { init: {} });
 
     // @ts-ignore
@@ -114,12 +113,14 @@ const runRelayer = async () => {
     waitForBlocks(chainNames[1].name, chainNames[1].address),
   ]);
 
-  wasmCode = fs.readFileSync(pathToContract) as Uint8Array;
-  contracts[chainNames[0].name].codeHash = toHex(sha256(wasmCode));
-  contracts[chainNames[1].name].codeHash = toHex(sha256(wasmCode));
+  let wasmCodeDest: Uint8Array = fs.readFileSync(pathToDestinationContract) as Uint8Array;
+  let wasmCodeSource: Uint8Array = fs.readFileSync(pathToSourceContract) as Uint8Array;
 
-  contracts[chainNames[0].name] = await uploadAndInstantiateContract(chainNames[0].name, accounts[0].secretjs);
-  contracts[chainNames[1].name] = await uploadAndInstantiateContract(chainNames[1].name, accounts2[0].secretjs);
+  contracts[chainNames[0].name].codeHash = toHex(sha256(wasmCodeDest)); // secretdev-1 is the destination chain!
+  contracts[chainNames[1].name].codeHash = toHex(sha256(wasmCodeSource));
+
+  contracts[chainNames[0].name] = await uploadAndInstantiateContract(chainNames[0].name, accounts[0].secretjs, wasmCodeDest);
+  contracts[chainNames[1].name] = await uploadAndInstantiateContract(chainNames[1].name, accounts2[0].secretjs, wasmCodeSource);
 
   // fs.writeFileSync("../contract-addresses.log", contracts[chainNames[0].name].address + "\n");
   // fs.appendFileSync("../contract-addresses.log", contracts[chainNames[1].name].address);

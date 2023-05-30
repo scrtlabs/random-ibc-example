@@ -1,9 +1,9 @@
 [package]
-name = "ibc-proxy"
+name = "ibc-random-generator"
 version = "0.0.1"
 authors = ["Enigma <info@enigma.co>"]
 edition = "2021"
-description = "A Contract that imports random numbers generated on Secret Netowrk to the local chain"
+description = "A Contract that exports random numbers generated on Secret Netowrk to other chains"
 license = "MIT"
 exclude = [
   # Those files are cosmwasm-opt artifacts. You might want to commit them for convenience but they should not be part of the source code publication.
