@@ -26,7 +26,7 @@ use cosmwasm_std::{
 };
 
 use crate::msg::{CallbackInfo, ExecuteMsg, InstantiateMsg, PacketMsg, QueryMsg, RandomCallback};
-use crate::state::{load_callback, save_callback, Channel, StoredRandomAnswer};
+use crate::state::{pop_callback, save_callback, Channel, StoredRandomAnswer};
 // use crate::utils::verify_callback;
 use secret_toolkit_crypto::Prng;
 
@@ -34,6 +34,7 @@ use secret_toolkit_crypto::Prng;
 pub const IBC_APP_VERSION: &str = "ibc-v1";
 // Define a constant for the packet lifetime in seconds
 const PACKET_LIFETIME: u64 = 60 * 60;
+const BECH32_LEN: usize = 32;
 
 // Instantiate entry point
 #[entry_point]
@@ -73,13 +74,16 @@ pub fn execute(
         ExecuteMsg::RequestRandom { job_id, callback } => {
             // Get the last opened channel ID
             let channel_id = Channel::get_last_opened(deps.storage)?;
+
+            // prepend the callback address to the job_id so that there is no collision between consumers
+            let full_job_id = callback.contract.address.to_string().clone() + &job_id;
+            save_callback(deps.storage, &full_job_id, callback)?;
+
             // Create a new packet message to request a random value
             let packet = PacketMsg::RequestRandom {
-                job_id: job_id.clone(),
+                job_id: full_job_id,
                 length: None,
             };
-
-            save_callback(deps.storage, callback)?;
 
             Ok(Response::new().add_message(IbcMsg::SendPacket {
                 channel_id,
@@ -96,6 +100,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::LastIbcOperation {} => Ok(to_binary(&"No operations".to_string())?),
 
         QueryMsg::ViewReceivedLifeAnswer {} => {
+            // todo the StoredRandomAnswer is never saved to
             Ok(to_binary(&StoredRandomAnswer::get(deps.storage)?)?)
         }
     }
@@ -188,10 +193,10 @@ pub fn ibc_packet_ack(
         PacketMsg::Message { .. } => Ok(IbcBasicResponse::default()),
 
         PacketMsg::RandomResponse { job_id, random } => {
-            // todo: support more than 1 concurrent job
-            let callback = load_callback(deps.storage)?;
+            let callback = pop_callback(deps.storage, &job_id)?;
 
-            let msg = create_random_response_callback(callback, job_id, random)?;
+            let original_job_id = job_id[BECH32_LEN..].to_string();
+            let msg = create_random_response_callback(callback, original_job_id, random)?;
 
             Ok(IbcBasicResponse::default().add_message(msg))
         }

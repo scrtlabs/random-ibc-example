@@ -2,10 +2,6 @@
 
 set -ex
 
-# Set the contract address
-contract="secret15k9rjfpu4jhfwtgdgswpy46fa4s0af54ncgwmk"
-code_hash="1e3d516013e80cfcdd5be8838833c2627698c9a678a3c2494917a2255277763a"
-
 # config cli
 secretcli config node http://localsecret-1:26657
 secretcli config keyring-backend test
@@ -16,13 +12,23 @@ secretcli config chain-id secretdev-1
 a_mnemonic="chair love bleak wonder skirt permit say assist aunt credit roast size obtain minute throw sand usual age smart exact enough room shadow charge"
 echo $a_mnemonic | secretcli keys add a --recover
 
-
 # Check if the contract is deployed
-echo "Checking if contract $contract is deployed..."
-while ! secretcli q wasm contract $contract &> /dev/null; do
+echo "Waiting for a connection with consumer chain..."
+while ! secretcli q wasm list-code &> /dev/null; do
     sleep 1
 done
-echo "Contract $contract is deployed!"
+echo "There is a connection with consumer chain!"
+
+echo "Checking if any contract is deployed..."
+list_code_output=$(secretcli q wasm list-contract-by-code 1)
+while [ -z "$list_code_output" ] ; do
+    sleep 1
+    list_code_output=$(secretcli q wasm list-contract-by-code 1)
+done
+echo "A Contract is deployed!"
+
+proxy_code_hash=$(secretcli q wasm list-code | jq -r ".[0].code_hash")
+proxy_contract=$(secretcli q wasm list-contract-by-code 1 | jq -r ".[0].contract_address")
 
 # Check if IBC channel-0 is open
 echo "Checking if IBC channel-0 is open..."
@@ -57,7 +63,7 @@ secretcli q tx "$STORE_TX_HASH" --output json |
 
 INIT_TX_HASH=$(
     yes |
-        secretcli tx compute instantiate 2 '{"init": {"rand_provider": {"address": "'$contract'", "code_hash": "'$code_hash'"}}}' --label test --output json --gas-prices 0.25uscrt --from a |
+        secretcli tx compute instantiate 2 '{"init": {"rand_provider": {"address": "'$proxy_contract'", "code_hash": "'$proxy_code_hash'"}}}' --label test --output json --gas-prices 0.25uscrt --from a |
         jq -r .txhash
 )
 
@@ -81,4 +87,4 @@ wait_for_tx "$SEND_TX_HASH" "Waiting for transfer to finish on-chain..."
 secretcli q compute tx "$SEND_TX_HASH" --output json | jq
 
 # Start the web server
-python3 ui/app.py
+CONSUMER_CONTRACT="$CONTRACT_ADDRESS" python3 ui/app.py

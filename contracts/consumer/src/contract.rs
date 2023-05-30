@@ -136,7 +136,7 @@ pub fn save_contract(store: &mut dyn cosmwasm_std::Storage, random: ContractInfo
 pub fn get_rand_result(store: &dyn cosmwasm_std::Storage) -> StdResult<(u64, String)> {
     STORED_RANDOM_RESULT
         .load(store)
-        .map_err(|_err| StdError::generic_err("No stored random contract here"))
+        .map_err(|_err| StdError::generic_err("No stored random result here"))
 }
 
 // Function to store the random result
