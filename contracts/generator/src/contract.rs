@@ -25,7 +25,7 @@ use cosmwasm_std::{
     WasmMsg,
 };
 
-use crate::msg::{InstantiateMsg, PacketMsg, QueryMsg};
+use crate::msg::{ExecuteMsg, InstantiateMsg, PacketMsg, QueryMsg};
 use crate::state::Channel;
 // use crate::utils::verify_callback;
 use secret_toolkit_crypto::Prng;
@@ -49,27 +49,28 @@ pub fn instantiate(
         .add_attribute("init", to_binary(&"Initialized".to_string())?.to_string()))
 }
 
-// #[entry_point]
-// pub fn execute(
-//     deps: DepsMut,
-//     env: Env,
-//     _info: MessageInfo,
-//     msg: ExecuteMsg,
-// ) -> StdResult<Response> {
-//     Ok(Response::default())
-// }
+#[entry_point]
+pub fn execute(
+    _deps: DepsMut,
+    _env: Env,
+    _info: MessageInfo,
+    _msg: ExecuteMsg,
+) -> StdResult<Response> {
+    Ok(Response::default())
+}
 
-// #[entry_point]
-// pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
-//     match msg {
-//         QueryMsg::LastIbcOperation {} => Ok(to_binary(&"No operations".to_string())?),
-//
-//         QueryMsg::ViewReceivedLifeAnswer {} => {
-//             // todo the StoredRandomAnswer is never saved to
-//             Ok(to_binary(&StoredRandomAnswer::get(deps.storage)?)?)
-//         }
-//     }
-// }
+#[entry_point]
+pub fn query(_deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
+    match msg {
+        QueryMsg::LastIbcOperation {} => Ok(to_binary(&"No operations".to_string())?),
+
+        QueryMsg::ViewReceivedLifeAnswer {} => {
+            // todo the StoredRandomAnswer is never saved to
+            // Ok(to_binary(&StoredRandomAnswer::get(deps.storage)?)?)
+            Ok(Binary::default())
+        }
+    }
+}
 
 #[entry_point]
 pub fn ibc_channel_open(
@@ -147,28 +148,14 @@ pub fn ibc_packet_receive(
     Ok(response)
 }
 
-// #[entry_point]
-// pub fn ibc_packet_ack(
-//     deps: DepsMut,
-//     _env: Env,
-//     msg: IbcPacketAckMsg,
-// ) -> StdResult<IbcBasicResponse> {
-//     let ack_data = from_binary(&msg.acknowledgement.data)?;
-//     match ack_data {
-//         PacketMsg::Message { .. } => Ok(IbcBasicResponse::default()),
-//
-//         PacketMsg::RandomResponse { job_id, random } => {
-//             let callback = pop_callback(deps.storage, &job_id)?;
-//
-//             let original_job_id = job_id[BECH32_LEN..].to_string();
-//             let msg = create_random_response_callback(callback, original_job_id, random)?;
-//
-//             Ok(IbcBasicResponse::default().add_message(msg))
-//         }
-//
-//         _ => Ok(IbcBasicResponse::default()),
-//     }
-// }
+#[entry_point]
+pub fn ibc_packet_ack(
+    _deps: DepsMut,
+    _env: Env,
+    _msg: IbcPacketAckMsg,
+) -> StdResult<IbcBasicResponse> {
+    Ok(IbcBasicResponse::default())
+}
 
 #[entry_point]
 pub fn ibc_channel_close(
