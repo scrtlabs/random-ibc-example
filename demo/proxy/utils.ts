@@ -1,4 +1,5 @@
-import { IbcClient, Link } from "@confio/relayer";
+import { IbcClient, Link, RelayInfo } from "@confio/relayer";
+import { Height } from 'cosmjs-types/ibc/core/client/v1/client';
 import { ChannelPair } from "@confio/relayer/build/lib/link";
 import { GasPrice } from "@cosmjs/stargate";
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
@@ -150,12 +151,30 @@ export async function createIbcChannel(link: Link, srcPort: string, destPort: st
   return channels;
 }
 
+function didRelaySome(relayInfo: RelayInfo) {
+  return relayInfo.packetsFromA > 0 || relayInfo.packetsFromB > 0;
+}
+
 export async function loopRelayer(link: Link) {
-  let nextRelay = {};
+  const maxAgeSeconds = 30; // only update clients if 1/3 of the unbonding period has passed (1/3recommended trusting period)
   while (true) {
     try {
-      nextRelay = await link.relayAll();
-      await Promise.all([link.updateClient("A"), link.updateClient("B")]);
+      await link.relayAll().then((relay: RelayInfo) => {
+        if (didRelaySome(relay)) {
+          console.log(`relayed: `, relay);
+        }
+      });
+
+      function logUpdate(chain: string) {
+        return (h: Height | null) => {
+          if (h != null) {
+            console.log(`updated ${chain} with height ${h.revisionHeight}`);
+          }
+        }
+      }
+
+      link.updateClientIfStale("A", maxAgeSeconds).then(logUpdate("A"));
+      link.updateClientIfStale("B", maxAgeSeconds).then(logUpdate("B"));
     } catch (e) {
       console.error(`Caught error: `, e);
     }
