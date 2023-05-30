@@ -3,8 +3,6 @@ use cosmwasm_std::{
     entry_point,
     from_binary,
     to_binary,
-    Binary,
-    Deps,
     DepsMut,
     Env,
     Ibc3ChannelOpenResponse,
@@ -25,10 +23,8 @@ use cosmwasm_std::{
     WasmMsg,
 };
 
-use crate::msg::{CallbackInfo, ExecuteMsg, InstantiateMsg, PacketMsg, QueryMsg, RandomCallback};
-use crate::state::{pop_callback, save_callback, Channel, StoredRandomAnswer};
-// use crate::utils::verify_callback;
-use secret_toolkit_crypto::Prng;
+use crate::msg::{CallbackInfo, ExecuteMsg, InstantiateMsg, PacketMsg, RandomCallback};
+use crate::state::{pop_callback, save_callback, Channel};
 
 // Define a constant for the IBC app version
 pub const IBC_APP_VERSION: &str = "ibc-v1";
@@ -57,20 +53,6 @@ pub fn execute(
     msg: ExecuteMsg,
 ) -> StdResult<Response> {
     match msg {
-        ExecuteMsg::SendIbcPacket { message } => {
-            let channel_id = Channel::get_last_opened(deps.storage)?;
-            let packet = PacketMsg::Message {
-                value: channel_id.clone() + &message,
-            };
-
-            // Create a new IBC message to send the packet
-            Ok(Response::new().add_message(IbcMsg::SendPacket {
-                channel_id,
-                data: to_binary(&packet)?,
-                timeout: IbcTimeout::with_timestamp(env.block.time.plus_seconds(PACKET_LIFETIME)),
-            }))
-        }
-
         ExecuteMsg::RequestRandom { job_id, callback } => {
             // Get the last opened channel ID
             let channel_id = Channel::get_last_opened(deps.storage)?;
@@ -93,18 +75,6 @@ pub fn execute(
         }
     }
 }
-
-// #[entry_point]
-// pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
-//     match msg {
-//         QueryMsg::LastIbcOperation {} => Ok(to_binary(&"No operations".to_string())?),
-//
-//         QueryMsg::ViewReceivedLifeAnswer {} => {
-//             // todo the StoredRandomAnswer is never saved to
-//             Ok(to_binary(&StoredRandomAnswer::get(deps.storage)?)?)
-//         }
-//     }
-// }
 
 #[entry_point]
 pub fn ibc_channel_open(
@@ -144,8 +114,8 @@ pub fn ibc_channel_connect(
 
 #[entry_point]
 pub fn ibc_packet_receive(
-    deps: DepsMut,
-    env: Env,
+    _deps: DepsMut,
+    _env: Env,
     msg: IbcPacketReceiveMsg,
 ) -> StdResult<IbcReceiveResponse> {
     let mut response = IbcReceiveResponse::new();
@@ -158,24 +128,6 @@ pub fn ibc_packet_receive(
             };
             response = response.set_ack(to_binary(&res).unwrap());
         }
-
-        // // todo: return random with different lengths
-        // PacketMsg::RequestRandom { job_id, .. } => {
-        //     deps.api.debug(&format!("{:?}", env));
-        //
-        //     // todo: handle random not in block for some reason?
-        //     let random = env.block.random.unwrap();
-        //
-        //     let mut rng = Prng::new(random.as_slice(), job_id.as_bytes());
-        //     let rand_for_job = hex::encode(rng.rand_bytes());
-        //
-        //     let res = PacketMsg::RandomResponse {
-        //         random: rand_for_job,
-        //         job_id,
-        //     };
-        //     response = response.set_ack(to_binary(&res).unwrap());
-        // }
-
         _ => {}
     }
 

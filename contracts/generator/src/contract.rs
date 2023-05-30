@@ -13,16 +13,13 @@ use cosmwasm_std::{
     IbcChannelConnectMsg,
     IbcChannelOpenMsg,
     IbcChannelOpenResponse,
-    IbcMsg,
     IbcPacketAckMsg,
     IbcPacketReceiveMsg,
     IbcPacketTimeoutMsg,
     IbcReceiveResponse,
-    IbcTimeout,
     MessageInfo,
     Response,
     StdResult,
-    WasmMsg,
 };
 
 use crate::msg::{ExecuteMsg, InstantiateMsg, PacketMsg, QueryMsg};
@@ -32,9 +29,6 @@ use secret_toolkit_crypto::Prng;
 
 // Define a constant for the IBC app version
 pub const IBC_APP_VERSION: &str = "ibc-v1";
-// Define a constant for the packet lifetime in seconds
-const PACKET_LIFETIME: u64 = 60 * 60;
-const BECH32_LEN: usize = 32;
 
 // Instantiate entry point
 #[entry_point]
@@ -62,13 +56,8 @@ pub fn execute(
 #[entry_point]
 pub fn query(_deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
-        QueryMsg::LastIbcOperation {} => Ok(to_binary(&"No operations".to_string())?),
-
-        QueryMsg::ViewReceivedLifeAnswer {} => {
-            // todo the StoredRandomAnswer is never saved to
-            // Ok(to_binary(&StoredRandomAnswer::get(deps.storage)?)?)
-            Ok(Binary::default())
-        }
+        // todo this never changes
+        QueryMsg::LastIbcOperation {} => Ok(to_binary(&"No operations".to_string())?)
     }
 }
 

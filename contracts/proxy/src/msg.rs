@@ -11,7 +11,6 @@ pub enum InstantiateMsg {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
-    SendIbcPacket { message: String },
     RequestRandom { job_id: String, callback: CallbackInfo }
 }
 
