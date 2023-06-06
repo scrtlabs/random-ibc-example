@@ -1,6 +1,5 @@
 use cosmwasm_std::{
-    entry_point, to_binary, Binary, ContractInfo, Deps, DepsMut, Env, MessageInfo, Response,
-    StdError, StdResult,
+    entry_point, to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult,
 };
 use schemars::JsonSchema;
 use secret_toolkit::storage::Item;
@@ -13,7 +12,7 @@ pub const KEY_STORED_RANDOM_CONTRACT: &[u8] = b"rand";
 pub const KEY_STORED_RANDOM_RESULT: &[u8] = b"rand_result";
 
 // Static items for the storage
-pub static STORED_RANDOM: Item<ContractInfo> = Item::new(KEY_STORED_RANDOM_CONTRACT);
+pub static STORED_RANDOM: Item<RandProviderContractInfo> = Item::new(KEY_STORED_RANDOM_CONTRACT);
 pub static STORED_RANDOM_RESULT: Item<(u64, String)> = Item::new(KEY_STORED_RANDOM_RESULT);
 
 // Entry point for handling queries
@@ -81,12 +80,21 @@ pub fn execute(
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum InstantiateMsg {
-    Init { rand_provider: ContractInfo },
+    Init {
+        rand_provider: RandProviderContractInfo,
+    },
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+pub struct RandProviderContractInfo {
+    pub address: String,
+    #[serde(default)]
+    pub code_hash: String,
 }
 
 impl InstantiateMsg {
     // Get the contract information from the InstantiateMsg
-    fn get_contract(self) -> ContractInfo {
+    fn get_contract(self) -> RandProviderContractInfo {
         match self {
             InstantiateMsg::Init { rand_provider } => rand_provider,
         }
@@ -121,14 +129,17 @@ pub struct LastRandomResponse {
 }
 
 // Function to get the stored random contract information
-pub fn get_contract(store: &dyn cosmwasm_std::Storage) -> StdResult<ContractInfo> {
+pub fn get_contract(store: &dyn cosmwasm_std::Storage) -> StdResult<RandProviderContractInfo> {
     STORED_RANDOM
         .load(store)
         .map_err(|_err| StdError::generic_err("No stored random contract here"))
 }
 
 // Function to save the random contract information
-pub fn save_contract(store: &mut dyn cosmwasm_std::Storage, random: ContractInfo) -> StdResult<()> {
+pub fn save_contract(
+    store: &mut dyn cosmwasm_std::Storage,
+    random: RandProviderContractInfo,
+) -> StdResult<()> {
     STORED_RANDOM.save(store, &random)
 }
 

@@ -1,3 +1,4 @@
+use crate::contract::RandProviderContractInfo;
 use crate::random::ExecuteMsg::RequestRandom;
 use cosmwasm_std::WasmMsg::Execute;
 use cosmwasm_std::{from_binary, to_binary, Binary, ContractInfo, CosmosMsg, Env, StdResult};
@@ -25,7 +26,7 @@ pub enum RandomCallback {
 
 pub fn get_random_msg(
     env: Env,
-    provider: ContractInfo,
+    provider: RandProviderContractInfo,
     job_id: String,
     _msg: Option<Binary>,
 ) -> StdResult<CosmosMsg> {
