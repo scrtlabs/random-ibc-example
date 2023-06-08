@@ -1,4 +1,3 @@
-use crate::random::ExecuteMsg::RequestRandom;
 use cosmwasm_std::WasmMsg::Execute;
 use cosmwasm_std::{from_binary, to_binary, Binary, ContractInfo, CosmosMsg, Env, StdResult};
 use schemars::JsonSchema;
